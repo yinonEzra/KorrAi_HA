@@ -5,8 +5,8 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     [SerializeField] Vector2 movementAxis;
+    [SerializeField] Vector2 mouseAxis;
     [SerializeField] float jump;
-    [SerializeField] Vector2 mouseInput;
 
     void Update()
     {
@@ -30,7 +30,8 @@ public class InputManager : MonoBehaviour
     }
     void Mouse()
     {
-        mouseInput = Input.mousePosition;
+        mouseAxis.x = Input.GetAxis("Mouse X");
+        mouseAxis.y = Input.GetAxis("Mouse Y");
     }
     //====================================
     //           GET FUNCTIONS
@@ -42,6 +43,10 @@ public class InputManager : MonoBehaviour
     public float GetJump()
     {
         return jump;
+    }
+    public Vector2 GetMouse()
+    {
+        return mouseAxis;
     }
 
 

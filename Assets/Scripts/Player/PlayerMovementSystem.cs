@@ -11,10 +11,11 @@ public class PlayerMovementSystem : MonoBehaviour
     [SerializeField] Animator animator;
     [SerializeField] Rigidbody rb;
     [SerializeField] CapsuleCollider col;
+    [SerializeField] Transform cameraTarget;
 
-    //-----------------
+    //-------------------
     // Movement & Forces
-    //-----------------
+    //-------------------
 
     [SerializeField] float jumpForce;
     [SerializeField] float moveForce;
@@ -23,9 +24,14 @@ public class PlayerMovementSystem : MonoBehaviour
     [SerializeField] float maxVelMove = 4;
     [SerializeField] float maxVelJump = 4;
     [SerializeField] float gravity;
+    [SerializeField] float lookSen;
     RaycastHit disRay;
     [SerializeField] Vector3 addedVelocity;
     [SerializeField] Vector3 velocity;
+    Quaternion playerRotationQ;
+    Quaternion cameraTargetRotationQ;
+    Vector3 rotateTargetV;
+    Vector3 cameraTargetRotationV;
 
     //---------------------
     // Animator's Controls
@@ -36,16 +42,26 @@ public class PlayerMovementSystem : MonoBehaviour
     int isGroundHash = Animator.StringToHash("IsGround");
     int jumpHash = Animator.StringToHash("Jump");
     int readyToLandHash = Animator.StringToHash("ReadyToLand");
-    int InJumpClipHash = Animator.StringToHash("Base Layer.Jump");
+    int inJumpClipHash = Animator.StringToHash("Base Layer.Jump");
+    int MoveBlendTreeHash = Animator.StringToHash("Base Layer.Move");
+    int landingHash = Animator.StringToHash("Base Layer.Landing");
 
-    bool isMove;
+    bool canMove;
     bool isGround;
     bool readyToLand;
+    bool isMoveBlendtree;
+
+    //======================
+    //       AWAKE
+    //======================
+    private void Awake()
+    {
+        cameraTargetRotationQ = cameraTarget.rotation;
+    }
 
     //======================
     //       UPDATE
     //======================
-
     private void FixedUpdate()
     {
         PlayerMovement();
@@ -54,21 +70,24 @@ public class PlayerMovementSystem : MonoBehaviour
     private void Update()
     {
         AnimatorParametersUpdate();
+        Rotate();
     }
 
     //========================
     //       MOVEMENT
     //========================
-
     void PlayerMovement()
     {
         Jump();
         Move();
     }
+    //========================
+    //       ANIMATION
+    //========================
 
     void AnimatorParametersUpdate()
     {
-        animator.SetBool(isMoveHash, isMove);
+        animator.SetBool(isMoveHash, canMove);
         animator.SetFloat(runFHash, inputManager.GetMove().y);
         animator.SetFloat(runSHash, inputManager.GetMove().x);
         animator.SetBool(isGroundHash, isGround);
@@ -76,16 +95,19 @@ public class PlayerMovementSystem : MonoBehaviour
         animator.SetBool(readyToLandHash, readyToLand);
 
         //Detect Input For "isMove" Boolean
-        isMove = (inputManager.GetMove().y != 0 || inputManager.GetMove().x != 0);
+        isMoveBlendtree = GetCurrentClip() == MoveBlendTreeHash || GetCurrentClip() == landingHash;
+        canMove = (inputManager.GetMove().magnitude != 0 && isMoveBlendtree);
 
         //Detect distance From ground before landing animation Starts
         if (!isGround)
         {
             if (Physics.Raycast(transform.position, Vector3.down, out disRay, 50, floorLayerMask))
             {
-                readyToLand = (disRay.distance < disToLand);
+                print(disRay.distance);
+                readyToLand = disRay.distance < disToLand;
             }
         }
+        else{ readyToLand = true; }
     }
     int GetCurrentClip()
     {
@@ -97,13 +119,13 @@ public class PlayerMovementSystem : MonoBehaviour
     }
 
     //===============================
-    //       FORCES CALCULATION
+    //          CALCULATION
     //===============================
     void Jump()
     {
-        if (GetCurrentClip() == InJumpClipHash && isGround)
+        if (GetCurrentClip() == inJumpClipHash && isGround)
         {
-            if (GetNormalizeClipTime() > 0.85f)
+            if (GetNormalizeClipTime() > 0.7f)
             {
                 addedVelocity.y = jumpForce;
             }
@@ -122,33 +144,48 @@ public class PlayerMovementSystem : MonoBehaviour
     }
     void Rotate()
     {
+        //LEFT & RIGHT Axis Look Rotation
+        transform.rotation = playerRotationQ;
+        playerRotationQ.eulerAngles = rotateTargetV;
+        rotateTargetV.y += inputManager.GetMouse().x * lookSen * Time.deltaTime;
 
+        //UP & DOWN Axis Look Rotation
+        cameraTarget.localRotation = cameraTargetRotationQ;
+        cameraTargetRotationQ.eulerAngles = cameraTargetRotationV;
+        cameraTargetRotationV.x += inputManager.GetMouse().y * lookSen * Time.deltaTime * - 1;
     }
     void ForceCalculation()
     {
-        velocity = rb.velocity;
+        //-------------
+        //Get Velocity
+        //-------------
+        velocity = transform.InverseTransformDirection(rb.velocity);
 
         //----------
-        //Constrains
+        //Constrain
         //----------
         velocity.x = Mathf.Clamp(velocity.x, -maxVelMove, maxVelMove);
         velocity.z = Mathf.Clamp(velocity.z, -maxVelMove, maxVelMove);
         velocity.y = Mathf.Clamp(velocity.y, -Mathf.Infinity, maxVelJump);
         addedVelocity.y = Mathf.Clamp(addedVelocity.y, 0, Mathf.Infinity);
+        if (!canMove && isGround)
+        {
+            velocity.x = 0; velocity.z = 0;
+        }
 
-
+        //---------------
+        //Apply Velocity
+        //---------------
         velocity += addedVelocity;
-        rb.velocity = velocity;
+        rb.velocity = transform.TransformDirection(velocity);
         rb.AddForce(Physics.gravity * gravity);
-
-        //rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxVel);
     }
 
     //========================
     //       COLLISIONS
     //========================
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
         if (collision.collider.CompareTag("Floor"))
         {
@@ -160,6 +197,13 @@ public class PlayerMovementSystem : MonoBehaviour
         if (collision.collider.CompareTag("Floor"))
         {
             isGround = false;
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Fault"))
+        {
+            //Write Here
         }
     }
 
