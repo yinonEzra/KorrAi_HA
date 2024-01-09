@@ -5,27 +5,43 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     [SerializeField] Vector2 movementAxis;
-
-    int isMoveAnimator = Animator.StringToHash("IsMove");
-    bool isMove;
-
+    [SerializeField] float jump;
+    [SerializeField] Vector2 mouseInput;
 
     void Update()
     {
         Move();
+        Jump();
+        Mouse();
     }
 
-    //====================================
-    //           PLAYER MOVEMENT
-    //===================================
+    //=====================================
+    //           INPUT DETECTION
+    //=====================================
     void Move()
     {
         movementAxis.y = Input.GetAxis("Vertical");
         movementAxis.x = Input.GetAxis("Horizontal");
+
     }
+    void Jump()
+    {
+        jump = (Input.GetKey(KeyCode.Space)) ? jump = 1 : jump = 0;
+    }
+    void Mouse()
+    {
+        mouseInput = Input.mousePosition;
+    }
+    //====================================
+    //           GET FUNCTIONS
+    //===================================
     public Vector2 GetMove()
     {
         return movementAxis;
+    }
+    public float GetJump()
+    {
+        return jump;
     }
 
 
