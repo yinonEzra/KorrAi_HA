@@ -16,7 +16,6 @@ public class PlayerMovementSystem : MonoBehaviour
     //-------------------
     // Movement & Forces
     //-------------------
-
     [SerializeField] float jumpForce;
     [SerializeField] float moveForce;
     [SerializeField] LayerMask floorLayerMask;
@@ -32,6 +31,7 @@ public class PlayerMovementSystem : MonoBehaviour
     Quaternion cameraTargetRotationQ;
     Vector3 rotateTargetV;
     Vector3 cameraTargetRotationV;
+    bool isFloorDetected;
 
     //---------------------
     // Animator's Controls
@@ -81,10 +81,10 @@ public class PlayerMovementSystem : MonoBehaviour
         Jump();
         Move();
     }
+
     //========================
     //       ANIMATION
     //========================
-
     void AnimatorParametersUpdate()
     {
         animator.SetBool(isMoveHash, canMove);
@@ -94,20 +94,17 @@ public class PlayerMovementSystem : MonoBehaviour
         animator.SetFloat(jumpHash, inputManager.GetJump());
         animator.SetBool(readyToLandHash, readyToLand);
 
-        //Detect Input For "isMove" Boolean
+        //Detect Input For "canMove" Boolean
         isMoveBlendtree = GetCurrentClip() == MoveBlendTreeHash || GetCurrentClip() == landingHash;
         canMove = (inputManager.GetMove().magnitude != 0 && isMoveBlendtree);
 
         //Detect distance From ground before landing animation Starts
         if (!isGround)
         {
-            if (Physics.Raycast(transform.position, Vector3.down, out disRay, 50, floorLayerMask))
-            {
-                print(disRay.distance);
-                readyToLand = disRay.distance < disToLand;
-            }
+            isFloorDetected = Physics.Raycast(transform.position, Vector3.down, out disRay, 50, floorLayerMask);
+            readyToLand = isFloorDetected ? disRay.distance < disToLand : false;
         }
-        else{ readyToLand = true; }
+        else { readyToLand = true; }
     }
     int GetCurrentClip()
     {
@@ -153,6 +150,7 @@ public class PlayerMovementSystem : MonoBehaviour
         cameraTarget.localRotation = cameraTargetRotationQ;
         cameraTargetRotationQ.eulerAngles = cameraTargetRotationV;
         cameraTargetRotationV.x += inputManager.GetMouse().y * lookSen * Time.deltaTime * - 1;
+        cameraTargetRotationV.x = Mathf.Clamp(cameraTargetRotationV.x, -25, 80);
     }
     void ForceCalculation()
     {
@@ -162,7 +160,7 @@ public class PlayerMovementSystem : MonoBehaviour
         velocity = transform.InverseTransformDirection(rb.velocity);
 
         //----------
-        //Constrain
+        //Constrains
         //----------
         velocity.x = Mathf.Clamp(velocity.x, -maxVelMove, maxVelMove);
         velocity.z = Mathf.Clamp(velocity.z, -maxVelMove, maxVelMove);
@@ -184,7 +182,6 @@ public class PlayerMovementSystem : MonoBehaviour
     //========================
     //       COLLISIONS
     //========================
-
     private void OnCollisionStay(Collision collision)
     {
         if (collision.collider.CompareTag("Floor"))
@@ -201,10 +198,7 @@ public class PlayerMovementSystem : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Fault"))
-        {
-            //Write Here
-        }
+
     }
 
 }
