@@ -7,29 +7,19 @@ public class RoomEditor : MonoBehaviour
     //---------------------
     //    Dependencies
     //---------------------
-    [SerializeField] Transform floorParent;
-    [SerializeField] Transform wallsParent;
-    [SerializeField] Transform ceilingParent;
+    public Transform floorParent;
+    public Transform wallsParent;
+    public Transform ceilingParent;
+    public Transform interactablesgParent;
+
     Transform floorTile;
     Transform wallTile;
     Transform ceilingTile;
 
-    public List<Transform> floors = new List<Transform>();
-    public List<Transform> walls = new List<Transform>();
-    public List<Transform> ceiling = new List<Transform>();
-
-    public List<Transform> standWalls = new List<Transform>();
-
-    [Range(1,10)]
-    [SerializeField] int roomHeight = 0;
-    [Range(1, 25)]
-    [SerializeField] int roomWidth = 0;
-    [Range(1, 25)]
-    [SerializeField] int roomDepth = 0;
-
-    Transform standWall;
-
-    public void NewRoomMethod()
+    //===========================
+    //    ROOM CONTROL METHODS 
+    //===========================
+    public void NewRoomMethod(int height, int width, int depth)
     {
         floorParent = transform.Find("Floors");
         floorTile = transform.Find("FloorTileMOD");
@@ -39,16 +29,27 @@ public class RoomEditor : MonoBehaviour
 
         ceilingParent = transform.Find("Ceiling");
         ceilingTile = transform.Find("CeilingTileMOD");
+        SetRoom(height, width, depth);
     }
-  
     public void SetRoom(int height, int width, int depth)
     {
+        GenerateWalls(height, width, depth);
+        GenerateFloor(width, depth - 1);
+        GenerateCeiling(height, width, depth - 1);
+
+    }
+
+    //=======================
+    //    ROOM GENERATORS 
+    //=======================
+    private void GenerateWalls(int height, int width, int depth)
+    {
+        wallTile.gameObject.SetActive(true);
+        DeleteChildren(wallsParent.gameObject);
+
         //----------
         //  Height
         //----------
-
-        DeleteChildren(wallsParent.gameObject);
-
         var standWallParent1 = new GameObject("01Wall").transform;
         standWallParent1.SetParent(wallsParent);
         standWallParent1.localPosition = Vector3.zero;
@@ -80,7 +81,7 @@ public class RoomEditor : MonoBehaviour
         var standWallParent2 = Instantiate(standWallParent1, wallsParent);
         standWallParent2.name = "02Wall";
         standWallParent2.position += (Vector3.forward * 15 * depth);
-        standWallParent2.localRotation  = Quaternion.Euler(Vector3.up * 180);
+        standWallParent2.localRotation = Quaternion.Euler(Vector3.up * 180);
         standWallParent2.position += (Vector3.right * 15 * width);
         //-----------
         //   Depth
@@ -88,7 +89,8 @@ public class RoomEditor : MonoBehaviour
         for (int i = 0; i < depth; i++)
         {
             var newStandWall = Instantiate(standWall, standWallParent3);
-            var newPosition = newStandWall.position;
+            newStandWall.localRotation = Quaternion.Euler(Vector3.up * 90);
+            var newPosition = newStandWall.position + (Vector3.forward * 15);
             newPosition += (Vector3.forward * 15 * i);
             newStandWall.position = newPosition;
         }
@@ -98,19 +100,90 @@ public class RoomEditor : MonoBehaviour
         standWallParent4.localRotation = Quaternion.Euler(Vector3.up * 180);
         standWallParent4.position += (Vector3.forward * 15 * depth);
 
+        wallTile.gameObject.SetActive(false);
+    }
+    private void GenerateFloor(int width, int depth)
+    {
+        floorTile.gameObject.SetActive(true);
+        DeleteChildren(floorParent.gameObject);
 
+        var stripFloor = new GameObject("StripFloor").transform;
+        stripFloor.SetParent(floorParent);
+        stripFloor.localPosition = Vector3.zero;
 
+        //----------
+        //   Width
+        //----------
+        for (int i = 0; i < width; i++)
+        {
+            var newFloor = Instantiate(floorTile, stripFloor.transform);
+            var newPosition = floorTile.position;
+            newPosition += (Vector3.right * 15 * i);
+            newFloor.position = newPosition;
+        }
 
+        //-----------
+        //   Depth
+        //-----------
+        for (int i = 0; i < depth; i++)
+        {
+            var newStripFloor = Instantiate(stripFloor, floorParent);
+            var newPosition = newStripFloor.position + (Vector3.forward * 15);
+            newPosition += (Vector3.forward * 15 * i);
+            newStripFloor.position = newPosition;
+        }
 
-        roomHeight = height - 1;
-        roomWidth = width - 1;
-        roomDepth = depth - 1;
+        floorTile.gameObject.SetActive(false);
+    }
+    private void GenerateCeiling(int height, int width, int depth)
+    {
+        ceilingTile.gameObject.SetActive(true);
+        DeleteChildren(ceilingParent.gameObject);
+
+        var stripCeiling = new GameObject("StripCeiling").transform;
+        stripCeiling.SetParent(ceilingParent);
+        stripCeiling.localPosition = Vector3.zero;
+
+        //----------
+        //   Width
+        //----------
+        for (int i = 0; i < width; i++)
+        {
+            var newCeiling = Instantiate(ceilingTile, stripCeiling.transform);
+            var newPosition = ceilingTile.position;
+            newPosition += (Vector3.right * 15 * i);
+            newCeiling.position = newPosition;
+        }
+
+        //-----------
+        //   Depth
+        //-----------
+        for (int i = 0; i < depth; i++)
+        {
+            var newStripCeiling = Instantiate(stripCeiling, ceilingParent);
+            var newPosition = newStripCeiling.position + (Vector3.forward * 15);
+            newPosition += (Vector3.forward * 15 * i);
+            newStripCeiling.position = newPosition;
+        }
+        //------------
+        //   Height
+        //------------
+        for (int i = 0; i < ceilingParent.childCount; i++)
+        {
+            var ceilingStrip = ceilingParent.GetChild(i);
+            ceilingStrip.position += Vector3.up * 15 * (height - 1);
+        }
+
+        ceilingTile.gameObject.SetActive(false);
+    }
+    void SetPlayerPos()
+    {
 
     }
+    private void SetMainLightPos()
+    {
 
-
-
-
+    }
     public void DeleteChildren(GameObject parent)
     {
         List<Transform> children = parent.transform.Cast<Transform>().ToList();
@@ -120,4 +193,16 @@ public class RoomEditor : MonoBehaviour
         }
     }
 
+    //=======================
+    //    PUBLIC METHODS 
+    //=======================
+
+    public InteractableKey GetKey()
+    {
+        return interactablesgParent.GetComponentInChildren<InteractableKey>();
+    }
+    public InteractableDoor GetDoor()
+    {
+        return interactablesgParent.GetComponentInChildren<InteractableDoor>();
+    }
 }

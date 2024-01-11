@@ -7,14 +7,14 @@ public class GameManager : MonoBehaviour
     //--------------
     // Dependencies
     //--------------
-    [SerializeField] InteractableKey key;
-    [SerializeField] InteractableDoor door;
+    [SerializeField] Transform rooms;
+    [SerializeField] int currentRoom;
     
 
 
     void KeyTaken()
     {
-        door.KeyTaken();
+        GetCurrentRoomEditor().GetDoor().StartAnimator();
     }
 
 
@@ -22,6 +22,15 @@ public class GameManager : MonoBehaviour
     //======================
     //    PUBLIC METHODS
     //======================
+    public Transform GetCurrentRoom()
+    {
+        return rooms.GetChild(currentRoom);
+    }
+    public RoomEditor GetCurrentRoomEditor()
+    {
+        var roomTransform = rooms.GetChild(currentRoom);
+        return roomTransform.gameObject.GetComponent<RoomEditor>();
+    }
     public void CallKeyTaken()
     {
         KeyTaken();
