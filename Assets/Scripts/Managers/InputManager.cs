@@ -7,12 +7,14 @@ public class InputManager : MonoBehaviour
     [SerializeField] Vector2 movementAxis;
     [SerializeField] Vector2 mouseAxis;
     [SerializeField] float jump;
+    [SerializeField] float esc;
 
     void Update()
     {
         Move();
         Jump();
         Mouse();
+        Esc();
     }
 
     //=====================================
@@ -33,6 +35,10 @@ public class InputManager : MonoBehaviour
         mouseAxis.x = Input.GetAxis("Mouse X");
         mouseAxis.y = Input.GetAxis("Mouse Y");
     }
+    void Esc()
+    {
+        esc = (Input.GetKeyDown(KeyCode.Escape)) ? esc = 1 : esc = 0;
+    }
     //====================================
     //           GET FUNCTIONS
     //===================================
@@ -47,6 +53,10 @@ public class InputManager : MonoBehaviour
     public Vector2 GetMouse()
     {
         return mouseAxis;
+    }
+    public float GetEsc()
+    {
+        return esc;
     }
 
 

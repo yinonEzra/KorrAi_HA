@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: 1feeea52b742674458518233d8059d17
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Fb Einstein HebEng
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 7018232183959f54abed563bbcc2e724, type: 3}
+  - {fileID: 12800000, guid: 48d890a02cb13984ba582f5b2e1387a3, type: 3}
+  - {fileID: 12800000, guid: 0594edcc76d917548a1d633eafaeaeef, type: 3}
+  - {fileID: 12800000, guid: 30fd22ac14e48cf489971c2647e209a9, type: 3}
+  - {fileID: 12800000, guid: 2d31ee69b91d6e34093499d6d58a3733, type: 3}
+  - {fileID: 12800000, guid: d204638a28839a445a02e19b79dc892f, type: 3}
+  - {fileID: 12800000, guid: 4ea64e70fcadfff4c8af24223561401d, type: 3}
+  - {fileID: 12800000, guid: 1e59ebccbdf7a34428abd0ec7465b382, type: 3}
+  - {fileID: 12800000, guid: 284b6922155ad3149abc342ff3f3d556, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

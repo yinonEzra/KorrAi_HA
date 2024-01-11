@@ -25,7 +25,11 @@ public class LevelBuilder : MonoBehaviour
     [HideInInspector]
     public List<string> roomsS;
 
+    const float distanceBetweenRooms = 500;
 
+    //==========================
+    //     REFRESH METHODS
+    //==========================
     public void RefreshInterList()
     {
         interactablesS = new List<string>();
@@ -44,9 +48,19 @@ public class LevelBuilder : MonoBehaviour
             roomsS.Add(rooms[i].name);
         }
     }
-    public void SpawnPlatform()
+    //==========================
+    //     SPAWNING METHODS
+    //==========================
+    public void SpawnPlatform(float radius)
     {
-        var newPlatform = Instantiate(platform);
+        var PlatformParent = rooms[roomIndex].Find("Platforms");
+        var newPlatform = PrefabUtility.InstantiatePrefab(platform, PlatformParent) as Transform;
+        Vector3 newSize = newPlatform.localScale;
+        newSize.x = radius;
+        newSize.z = radius;
+        newPlatform.localScale = newSize;
+        newPlatform.localPosition = Vector3.zero;
+        print("Platform Spawned, radius: " + radius);
     }
     public void SpawnInteractable()
     {
@@ -100,7 +114,7 @@ public class LevelBuilder : MonoBehaviour
         newRoom.GetComponent<RoomEditor>().NewRoomMethod(height, width, depth);
         if (rooms.Count > 0)
         {
-            newRoom.transform.position = rooms[rooms.Count - 1].position + (Vector3.forward * 200);
+            newRoom.transform.position = rooms[rooms.Count - 1].position + (Vector3.forward * distanceBetweenRooms);
         }
     }
 }
@@ -149,7 +163,7 @@ public class LevelBuilderEditorOverride : Editor
 
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Room Height");
-        roomHeight = EditorGUILayout.IntSlider(roomHeight, 1, 8);
+        roomHeight = EditorGUILayout.IntSlider(roomHeight, 1, 6);
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.BeginHorizontal();
@@ -203,11 +217,6 @@ public class LevelBuilderEditorOverride : Editor
         {
             levelB.SpawnInteractable();
         }
-        
-        EditorGUILayout.Space(25f);
-        EditorGUILayout.LabelField("Script Dependencies", headLine);
-        EditorGUILayout.Space(5f);
-        base.OnInspectorGUI();
 
         //==========================
         //     Platform Spawner
@@ -220,8 +229,18 @@ public class LevelBuilderEditorOverride : Editor
         EditorGUILayout.EndHorizontal();
         if (GUILayout.Button("SPAWN IT", GUILayout.MaxHeight(30)))
         {
-            levelB.SpawnInteractable();
+            levelB.SpawnPlatform(platformRadius);
         }
+        EditorGUILayout.Space(25f);
+
+
+        //=======================
+        //     Dependencies
+        //=======================
+        EditorGUILayout.LabelField("Script Dependencies", headLine);
+        EditorGUILayout.Space(5f);
+        base.OnInspectorGUI();
+
 
     }
 
