@@ -4,23 +4,22 @@ using UnityEngine;
 
 public class InteractableKey : Interactable
 {
-    [SerializeField] GameManager gameManager;
-    [SerializeField] PoolManager_ShineFx shineFxPool;
+    
     [SerializeField] Transform fxPosition;
 
     private void Start()
     {
-        AttechDependencies();
+        Init();
     }
-    public void AttechDependencies()
+    protected override void OnTrigger(Collider other)
     {
-        gameManager = FindAnyObjectByType<GameManager>();
-        shineFxPool = FindAnyObjectByType<PoolManager_ShineFx>();
-    }
-    protected override void OnPickUp()
-    {
-        shineFxPool.GetObject(fxPosition.position);
+        fxPool.GetObject(fxPosition.position);
         gameManager.CallKeyTaken();
         transform.gameObject.SetActive(false);
+    }
+
+    protected override void OnCollision(Collision other)
+    {
+        //
     }
 }

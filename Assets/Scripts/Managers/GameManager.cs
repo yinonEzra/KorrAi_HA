@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,19 +17,33 @@ public class GameManager : MonoBehaviour
     [SerializeField] CinemachineVirtualCamera playerVirCam;
     [SerializeField] InputManager inputManager;
     [SerializeField] TMP_Text roomNumber_txt;
+    [SerializeField] GameObject MenuCanvas;
+    [SerializeField] GameObject InGameCanvas;
+    [SerializeField] GameObject WinMenuCanvas;
+    [SerializeField] GameObject LoseMenuCanvas;
+    [SerializeField] GameObject PauseMenuCanvas;
 
     string gamestate;
-
-    private void Start()
+    private void Awake()
+    {
+        InitMenuState();
+        Screen.SetResolution(1920, 1080, true);
+    }
+    private void InitMenuState()
     {
         var virCam = rooms.GetChild(currentRoom).Find("VirtualCamera");
-        virCam.GetComponent<CinemachineVirtualCamera>().Priority++;
+        virCam.GetComponent<CinemachineVirtualCamera>().Priority = 1;
+        gamestate = "Menu";
+        Color greyd = Color.white;
+        greyd.a = 0.1f;
+        InGameCanvas.transform.Find("Key (img)").GetComponent<Image>().color = greyd;
         DisplayUpdate();
     }
 
     void KeyTaken()
     {
-        GetCurrentRoomEditor().GetDoor().StartAnimator();
+        GetCurrentRoomEditor().GetDoor().OpenDoorAnim();
+        InGameCanvas.transform.Find("Key (img)").GetComponent<Image>().color = Color.white;
     }
 
     void GameStates()
@@ -35,18 +51,74 @@ public class GameManager : MonoBehaviour
         switch (gamestate)
         {
             case "Menu":
+                MenuCanvas.SetActive(true);
+                WinMenuCanvas.SetActive(false);
+                LoseMenuCanvas.SetActive(false);
+                InGameCanvas.SetActive(false);
+                PauseMenuCanvas.SetActive(false);
+                Cursor.visible = true;
+                inputManager.SetFreeze(true);
                 if (inputManager.GetEsc() > 0)
                 {
-                    Application.Quit();
+                    QuitGame();
                 }
                 break;
             case "InGame":
+                Cursor.visible = false;
+                WinMenuCanvas.SetActive(false);
+                LoseMenuCanvas.SetActive(false);
+                inputManager.SetFreeze(false);
+                MenuCanvas.SetActive(false);
+                PauseMenuCanvas.SetActive(false);
+                InGameCanvas.SetActive(true);
                 if (inputManager.GetEsc() > 0)
                 {
-                    BackToMenu();
+                    gamestate = "PauseGame";
                 }
                 break;
-
+            case "WinGame":
+                playerVirCam.Priority = 0;
+                WinMenuCanvas.SetActive(true);
+                MenuCanvas.SetActive(false);
+                LoseMenuCanvas.SetActive(false);
+                InGameCanvas.SetActive(false);
+                PauseMenuCanvas.SetActive(false);
+                Cursor.visible = true;
+                inputManager.SetFreeze(true);
+                player.gameObject.SetActive(false);
+                if (inputManager.GetEsc() > 0)
+                {
+                    FromWinBackToMenu();
+                }
+                break;
+            case "LoseGame":
+                playerVirCam.Priority = 0;
+                LoseMenuCanvas.SetActive(true);
+                WinMenuCanvas.SetActive(false);
+                MenuCanvas.SetActive(false);
+                InGameCanvas.SetActive(false);
+                PauseMenuCanvas.SetActive(false);
+                Cursor.visible = true;
+                inputManager.SetFreeze(true);
+                player.gameObject.SetActive(false);
+                if (inputManager.GetEsc() > 0)
+                {
+                    FromLoseBackToMenu();
+                }
+                break;
+            case "PauseGame":
+                PauseMenuCanvas.SetActive(true);
+                LoseMenuCanvas.SetActive(false);
+                WinMenuCanvas.SetActive(false);
+                MenuCanvas.SetActive(false);
+                InGameCanvas.SetActive(false);
+                Cursor.visible = true;
+                inputManager.SetFreeze(true);
+                if (inputManager.GetEsc() > 0)
+                {
+                    gamestate = "InGame";
+                }
+                break;
         }
     }
     private void Update()
@@ -56,7 +128,8 @@ public class GameManager : MonoBehaviour
 
     void DisplayUpdate()
     {
-        roomNumber_txt.text = currentRoom + 1.ToString() + " / " + rooms.childCount.ToString();
+        var disCurrentRoom = currentRoom + 1;
+        roomNumber_txt.text = disCurrentRoom.ToString() + " / " + rooms.childCount.ToString();
     }
     //======================
     //    PUBLIC METHODS
@@ -78,6 +151,15 @@ public class GameManager : MonoBehaviour
         playerVirCam.Priority = -1;
         gamestate = "Menu";
         DisplayUpdate();
+    }
+    public void Gameover()
+    {
+        gamestate = "LoseGame";
+        GetCurrentRoomEditor().GetDoor().GetDoorVCam().Priority = 1;
+    }
+    public void GameWin()
+    {
+        gamestate = "WinGame";
     }
     public Transform GetCurrentRoom()
     {
@@ -111,5 +193,23 @@ public class GameManager : MonoBehaviour
         oldvirCam.GetComponent<CinemachineVirtualCamera>().Priority--;
         virCam.GetComponent<CinemachineVirtualCamera>().Priority++;
         DisplayUpdate();
+    }
+    public void FromWinBackToMenu()
+    {
+        GetCurrentRoomEditor().GetDoor().GetDoorVCam().Priority = 0;
+        InitMenuState();
+    }
+    public void FromLoseBackToMenu()
+    {
+        GetCurrentRoomEditor().GetDoor().GetDoorVCam().Priority = 0;
+        InitMenuState();
+    }
+    public void ResumeGame()
+    {
+        gamestate = "InGame";
+    }
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

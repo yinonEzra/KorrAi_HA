@@ -1,8 +1,8 @@
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-
 
 public class LevelBuilder : MonoBehaviour
 {
@@ -54,12 +54,13 @@ public class LevelBuilder : MonoBehaviour
     public void SpawnPlatform(float radius)
     {
         var PlatformParent = rooms[roomIndex].Find("Platforms");
+        var amount = PlatformParent.childCount;
         var newPlatform = PrefabUtility.InstantiatePrefab(platform, PlatformParent) as Transform;
         Vector3 newSize = newPlatform.localScale;
         newSize.x = radius;
         newSize.z = radius;
         newPlatform.localScale = newSize;
-        newPlatform.localPosition = Vector3.zero;
+        newPlatform.localPosition = Vector3.up * amount;
         print("Platform Spawned, radius: " + radius);
     }
     public void SpawnInteractable()
@@ -68,6 +69,7 @@ public class LevelBuilder : MonoBehaviour
         var spawnedObject = interactables[intersIndex];
         var roomEditor = currentRoom.GetComponent<RoomEditor>();
         var spawnedParent = roomEditor.interactablesgParent;
+
         if (spawnedObject.name == "Heart")
         {
             spawnedParent = spawnedParent.Find("Hearts");
@@ -77,8 +79,16 @@ public class LevelBuilder : MonoBehaviour
         else if(spawnedObject.name == "Coin")
         {
             spawnedParent = spawnedParent.Find("Coins");
-            PrefabUtility.InstantiatePrefab(spawnedObject, spawnedParent);
+            var amount = spawnedParent.childCount;
+            var coin = PrefabUtility.InstantiatePrefab(spawnedObject, spawnedParent) as Transform;
+            coin.position += Vector3.forward * amount;
             print("Coin Spawned");
+        }
+        else if (spawnedObject.name == "Obstacle")
+        {
+            spawnedParent = spawnedParent.Find("Obstacles");
+            PrefabUtility.InstantiatePrefab(spawnedObject, spawnedParent);
+            print("Obstacle Spawned");
         }
         else if(spawnedObject.name == "Door")
         {
@@ -119,11 +129,6 @@ public class LevelBuilder : MonoBehaviour
     }
 }
 
-
-
-
-
-#if UNITY_EDITOR
 [CustomEditor(typeof(LevelBuilder))]
 public class LevelBuilderEditorOverride : Editor
 {
@@ -217,6 +222,8 @@ public class LevelBuilderEditorOverride : Editor
         {
             levelB.SpawnInteractable();
         }
+
+        EditorGUILayout.Space(30f);
 
         //==========================
         //     Platform Spawner

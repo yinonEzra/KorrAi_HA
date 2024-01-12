@@ -42,6 +42,7 @@ public class PlayerMovementSystem : MonoBehaviour
     int isGroundHash = Animator.StringToHash("IsGround");
     int jumpHash = Animator.StringToHash("Jump");
     int readyToLandHash = Animator.StringToHash("ReadyToLand");
+    int hitHash = Animator.StringToHash("Hit");
     int inJumpClipHash = Animator.StringToHash("Base Layer.Jump");
     int MoveBlendTreeHash = Animator.StringToHash("Base Layer.Move");
     int landingHash = Animator.StringToHash("Base Layer.Landing");
@@ -57,6 +58,10 @@ public class PlayerMovementSystem : MonoBehaviour
     private void Awake()
     {
         cameraTargetRotationQ = cameraTarget.rotation;
+    }
+    private void OnEnable()
+    {
+        isGround = false;
     }
 
     //======================
@@ -131,8 +136,8 @@ public class PlayerMovementSystem : MonoBehaviour
         {
             addedVelocity.y -= 1f;
         }
-        col.height = readyToLand ? 3f : 2f;
-        col.center = readyToLand ? Vector3.up * 1.5f : Vector3.up * 2f;
+        col.height = readyToLand ? 2.6f : 2f;
+        col.center = readyToLand ? Vector3.up * 1.3f : Vector3.up * 2f;
     }
     void Move()
     {
@@ -177,6 +182,14 @@ public class PlayerMovementSystem : MonoBehaviour
         velocity += addedVelocity;
         rb.velocity = transform.TransformDirection(velocity);
         rb.AddForce(Physics.gravity * gravity);
+    }
+
+    //==========================
+    //       PUBLIC METHODS
+    //==========================
+    public void HurtAnim()
+    {
+        animator.SetTrigger(hitHash);
     }
 
     //========================

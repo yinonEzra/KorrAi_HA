@@ -8,9 +8,11 @@ public class InputManager : MonoBehaviour
     [SerializeField] Vector2 mouseAxis;
     [SerializeField] float jump;
     [SerializeField] float esc;
+    [SerializeField] bool freezeInputs;
 
     void Update()
     {
+        if (freezeInputs) { return; }
         Move();
         Jump();
         Mouse();
@@ -39,7 +41,7 @@ public class InputManager : MonoBehaviour
     {
         esc = (Input.GetKeyDown(KeyCode.Escape)) ? esc = 1 : esc = 0;
     }
-    //====================================
+    //===================================
     //           GET FUNCTIONS
     //===================================
     public Vector2 GetMove()
@@ -58,8 +60,13 @@ public class InputManager : MonoBehaviour
     {
         return esc;
     }
-
-
+    //===================================
+    //           SET FUNCTIONS
+    //===================================
+    public void SetFreeze(bool freeze)
+    {
+        freezeInputs = freeze;
+    }
 
 
 }

@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6184315976019432956}
   - component: {fileID: 1129081795}
+  - component: {fileID: 8458748831451903232}
+  - component: {fileID: 6061011578042509702}
   m_Layer: 0
   m_Name: Heart
   m_TagString: Untagged
@@ -48,6 +50,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 200
   direction: {x: 0, y: 1, z: 0}
+--- !u!114 &8458748831451903232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4720289343994116055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b6e6fc08f0422843967396743e793c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 0}
+  shineFxPool: {fileID: 0}
+--- !u!65 &6061011578042509702
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4720289343994116055}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0.56, z: 0}
 --- !u!1 &5506012158272105578
 GameObject:
   m_ObjectHideFlags: 0

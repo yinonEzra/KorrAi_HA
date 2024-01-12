@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class InteractableDoor : Interactable
 {
@@ -9,11 +10,19 @@ public class InteractableDoor : Interactable
     [SerializeField] ParticleSystem particleFx;
     [SerializeField] float rotSpeed;
     [SerializeField] Animator anim;
-    float tFactor_Door = 1;
+    [SerializeField] Collider colliderToShutDown;
+    [SerializeField] CinemachineVirtualCamera vCam;
+    float tFactor_DoorOpen = 2;
+    float tFactor_DoorClose = 2;
     float rotateTarget = 160;
     float rotateStart = 0;
     Vector3 updatedRot;
 
+    private void Start()
+    {
+        Init();
+        updatedRot = doorPivot.localRotation.eulerAngles;
+    }
     private void Update()
     {
         DoorOpenAnim();
@@ -21,30 +30,55 @@ public class InteractableDoor : Interactable
 
     void DoorOpenAnim()
     {
-        doorPivot.rotation = Quaternion.Euler(updatedRot);
-        if (tFactor_Door < 1)
+        doorPivot.localRotation = Quaternion.Euler(updatedRot);
+        if (tFactor_DoorOpen < 1)
         {
-            tFactor_Door += Time.deltaTime * rotSpeed;
-            updatedRot.y = Mathf.SmoothStep(rotateStart, rotateTarget, tFactor_Door);
+            tFactor_DoorOpen += Time.deltaTime * rotSpeed;
+            updatedRot.y = Mathf.SmoothStep(rotateStart, rotateTarget, tFactor_DoorOpen);
+        }
+        else if (tFactor_DoorClose < 1)
+        {
+            tFactor_DoorClose += Time.deltaTime * rotSpeed;
+            updatedRot.y = Mathf.SmoothStep(rotateTarget, rotateStart, tFactor_DoorClose);
         }
     }
-    public void StartAnimator()
+    protected override void OnTrigger(Collider other)
     {
-        anim.SetTrigger("OpenDoor");
+        if (other.CompareTag("Player"))
+        {
+            CloseDoorAnim();
+            gameManager.GameWin();
+        }
     }
+    //=====================
+    //   PUBLIC METHODS
+    //=====================
+
     public void KeyTaken()
     {
         doorLight.color = Color.green;
         particleFx.Play();
-        StartRotateDoor();
+        StartOpenDoor();
+        colliderToShutDown.enabled = false;
     }
-    public void StartRotateDoor()
+    public void StartOpenDoor()
     {
-        tFactor_Door = 0;
+        tFactor_DoorOpen = 0;
     }
-    protected override void OnPickUp()
+    public void StartCloseDoor()
     {
-
+        tFactor_DoorClose = 0;
     }
-    
+    public void OpenDoorAnim()
+    {
+        anim.SetTrigger("OpenDoor");
+    }
+    public void CloseDoorAnim()
+    {
+        anim.SetTrigger("CloseDoor");
+    }
+    public CinemachineVirtualCamera GetDoorVCam()
+    {
+        return vCam;
+    }
 }
