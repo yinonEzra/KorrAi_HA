@@ -10,7 +10,6 @@ public class PlayerMovementSystem : MonoBehaviour
     [SerializeField] InputManager inputManager;
     [SerializeField] Animator animator;
     [SerializeField] Rigidbody rb;
-    [SerializeField] CapsuleCollider col;
     [SerializeField] Transform cameraTarget;
 
     //-------------------
@@ -125,19 +124,17 @@ public class PlayerMovementSystem : MonoBehaviour
     //===============================
     void Jump()
     {
-        if (GetCurrentClip() == inJumpClipHash && isGround)
+        if (GetCurrentClip() == inJumpClipHash)
         {
             if (GetNormalizeClipTime() > 0.7f)
             {
-                addedVelocity.y = jumpForce;
+                addedVelocity.y = jumpForce * inputManager.GetJump() * Time.fixedDeltaTime;
             }
         }
         else
         {
             addedVelocity.y -= 1f;
         }
-        col.height = readyToLand ? 2.6f : 2f;
-        col.center = readyToLand ? Vector3.up * 1.3f : Vector3.up * 2f;
     }
     void Move()
     {

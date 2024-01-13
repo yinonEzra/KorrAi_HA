@@ -66,6 +66,10 @@ public class InputManager : MonoBehaviour
     public void SetFreeze(bool freeze)
     {
         freezeInputs = freeze;
+        esc = 0;
+        jump = 0;
+        movementAxis = Vector2.zero;
+        mouseAxis = Vector2.zero;
     }
 
 

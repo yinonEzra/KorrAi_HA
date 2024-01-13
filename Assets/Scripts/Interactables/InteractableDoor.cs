@@ -44,7 +44,7 @@ public class InteractableDoor : Interactable
     }
     protected override void OnTrigger(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && gameManager.IsKeyTaken())
         {
             CloseDoorAnim();
             gameManager.GameWin();
